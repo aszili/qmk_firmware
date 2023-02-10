@@ -39,7 +39,7 @@ bool dip_switch_update_kb(uint8_t index, bool active) {
 
 #endif // DIP_SWITCH_ENABLE
 
-#if defined(RGB_MATRIX_ENABLE) && (defined(CAPS_LOCK_LED_INDEX) || defined(NUM_LOCK_LED_INDEX))
+#if defined(RGB_MATRIX_ENABLE) // && (defined(CAPS_LOCK_LED_INDEX) || defined(NUM_LOCK_LED_INDEX))
 
 bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
     if (!process_record_user(keycode, record)) {
@@ -71,26 +71,35 @@ bool rgb_matrix_indicators_advanced_kb(uint8_t led_min, uint8_t led_max) {
     if (!rgb_matrix_indicators_advanced_user(led_min, led_max)) {
         return false;
     }
-    // RGB_MATRIX_INDICATOR_SET_COLOR(index, red, green, blue);
-#    if defined(CAPS_LOCK_LED_INDEX)
-    if (host_keyboard_led_state().caps_lock) {
-        RGB_MATRIX_INDICATOR_SET_COLOR(CAPS_LOCK_LED_INDEX, 255, 255, 255);
-    } else {
-        if (!rgb_matrix_get_flags()) {
-            RGB_MATRIX_INDICATOR_SET_COLOR(CAPS_LOCK_LED_INDEX, 0, 0, 0);
-        }
+    HSV hsv = rgb_matrix_get_hsv();
+    switch(get_highest_layer(layer_state|default_layer_state)) {
+        case 3:
+            hsv.h = 0;
+            hsv.s = 255;
+            hsv.v = 255;//HSV_RED;
+            break;
+        case 2:
+            hsv.h = 0;
+            hsv.s = 0;
+            hsv.v = 255;//HSV_WHITE
+            break;
+        case 1:
+            hsv.h = 170;
+            hsv.s = 255;
+            hsv.v = 255;//HSV_BLUE;
+            break;
+        default:
+            break;
     }
-#    endif // CAPS_LOCK_LED_INDEX
-#    if defined(NUM_LOCK_LED_INDEX)
-    if (host_keyboard_led_state().num_lock) {
-        RGB_MATRIX_INDICATOR_SET_COLOR(NUM_LOCK_LED_INDEX, 255, 255, 255);
+    if (rgb_matrix_get_flags() == LED_FLAG_NONE) {
+        rgb_matrix_set_color_all(0, 0, 0);
     } else {
-        if (!rgb_matrix_get_flags()) {
-            RGB_MATRIX_INDICATOR_SET_COLOR(NUM_LOCK_LED_INDEX, 0, 0, 0);
+        if (hsv.v > rgb_matrix_get_val()) {
+            hsv.v = rgb_matrix_get_val();
         }
+        RGB rgb = hsv_to_rgb(hsv);
+        rgb_matrix_set_color_all(rgb.r, rgb.g, rgb.b);        
     }
-#    endif // NUM_LOCK_LED_INDEX
     return true;
 }
-
 #endif // RGB_MATRIX_ENABLE...

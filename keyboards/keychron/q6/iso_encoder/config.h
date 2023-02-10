@@ -37,7 +37,7 @@
 #define ENCODER_DEFAULT_POS 0x3
 
 /* Enable caps-lock LED*/
-#define CAPS_LOCK_LED_INDEX 60
+//#define CAPS_LOCK_LED_INDEX 60
 
 /* Enable NUM_LOCK_LED_INDEX */
-// #define NUM_LOCK_LED_INDEX 37
+//#define NUM_LOCK_LED_INDEX 37
